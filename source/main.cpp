@@ -1,5 +1,6 @@
 
 #include "Renderer/Renderer.h"
+#include "Mandelbrot/Mandelbrot.h"
 
 int main() {
 
@@ -8,36 +9,40 @@ int main() {
 		return 1;
 	}
 
+	std::vector<Colour> colourScale;
+	colourScale.emplace_back(255, 255, 255);
+	colourScale.emplace_back(0, 0, 255);
+	colourScale.emplace_back(0, 255, 0);
+	colourScale.emplace_back(255, 0, 0);
+	colourScale.emplace_back(0, 0, 0);
+
+	int initWindowWidth = 0;
+	int initWindowHeight = 0;
+	SDL_GetWindowSize(MBC::GetSDLWindow(), &initWindowWidth, &initWindowHeight);
+
+	std::vector<Colour> colourData;
+	colourData.reserve(initWindowWidth * initWindowHeight);
+
+	MBC::ComputeMandelbrotSetCPU(
+		colourData,
+		-2, 2,
+		-2, 2,
+		initWindowWidth, initWindowHeight,
+		colourScale
+	);
+
+	MBC::RenderColourData(colourData, initWindowWidth, initWindowHeight);
+
 	// Main loop
 	bool shouldQuit = false;
 	SDL_Event currentEvent;
 	SDL_zero(currentEvent);
-
-	std::vector<Colour> colourData(4);
-	colourData[0].r = 255;
-	colourData[0].g = 0;
-	colourData[0].b = 0;
-
-	colourData[1].r = 0;
-	colourData[1].g = 255;
-	colourData[1].b = 0;
-
-	colourData[2].r = 0;
-	colourData[2].g = 0;
-	colourData[2].b = 255;
-
-	colourData[3].r = 255;
-	colourData[3].g = 255;
-	colourData[3].b = 255;
-
-
 	while (!shouldQuit) {
 		while (SDL_PollEvent(&currentEvent)) {
 			if (currentEvent.type == SDL_EVENT_QUIT) {
 				shouldQuit = true;
 			}
 		}
-		MBC::RenderColourData(colourData, 2, 2);
 	}
 
 	MBC::DestroyRenderer();
